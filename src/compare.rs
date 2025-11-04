@@ -12,6 +12,8 @@ unsafe extern "C" {
 
 #[derive(Debug, Clone)]
 pub struct Score {
+    id: String,
+    seq: String,
     algo: String,
     exp_fold: String,
     fold: String,
@@ -39,7 +41,7 @@ impl Score {
         let fold = matrix.predict_fold();
         let accuracy = Self::get_accuracy(&seq.exp_fold, &fold);
 
-        Ok(Score { algo: algo, exp_fold: seq.exp_fold.clone(), fold: fold, score: accuracy })
+        Ok(Score { id: seq.get_id(), seq: seq.to_string(), algo: algo, exp_fold: seq.exp_fold.clone(), fold: fold, score: accuracy })
     }
 
 
@@ -56,8 +58,7 @@ impl Score {
         };
         let accuracy = Self::get_accuracy(&seq.exp_fold, &fold);
 
-        Ok(Score { algo: algo, exp_fold: seq.exp_fold.clone(), fold: fold, score: accuracy})
-
+        Ok(Score { id: seq.get_id(), seq: seq.to_string(), algo: algo, exp_fold: seq.exp_fold.clone(), fold: fold, score: accuracy })
     }
 
 

@@ -9,55 +9,37 @@ pub struct RnaSequence {
 }
 
 impl RnaSequence {
-    pub fn new() -> Self {
+    pub fn new(id: &str, fold: &str, seq: &str) -> Self {
         RnaSequence {
-            id: String::new(),
-            sequence: Vec::new(),
-            exp_fold: String::new(),
+            id: String::from(id),
+            sequence: Self::vecu8(seq).expect("RnaSequence::vecu8() fail."),
+            exp_fold: String::from(fold),
         }
     }
 
-    pub fn add_id(&mut self, id: &str) {
-        self.id.push_str(id)
-    }
-
-    pub fn get_id(&self) -> String {
-        self.id.clone()
-    }
-
-    pub fn add_seq(&mut self, id: String, seq_str: &str) -> Result<(), Box<dyn std::error::Error>> {
-        if self.id != id {
-            panic!("parsing seq that is not the one indicated by id.");
-        }
-
-        let cleaned: String = seq_str
+    fn vecu8(seq: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+        let cleaned: String = seq
             .chars()
             .filter(|&c| !c.is_whitespace() && c != '_')
             .collect();
 
-       let sequence: Vec<u8> = cleaned
-            .chars()
-            .map(|c| match c.to_ascii_uppercase() {
-                'A' => Ok(0),
-                'U' | 'T' => Ok(1),
-                'G' => Ok(2),
-                'C' => Ok(3),
-                _ => anyhow::bail!("Invalid nucleotide: {}. Found in seq: {}", c, id),
-            })
-            .collect::<Result<Vec<u8>, _>>()?; 
-
-        for i in 0..sequence.len() {
-            self.sequence.push(sequence[i])
+        let mut vec_seq = Vec::with_capacity(cleaned.len());
+        for c in cleaned.chars() {
+            let v = match c.to_ascii_uppercase() {
+                'A' => 0,
+                'U' | 'T' => 1,
+                'G' => 2,
+                'C' => 3,
+                _ => return Err(format!("Invalid nucleotide: {}", c).into()),
+            };
+            vec_seq.push(v);
         }
-        Ok(())
+
+        Ok(vec_seq)
     }
 
-    pub fn add_fold(&mut self, id: String, exp_fold: &str) -> Result<(), Box<dyn std::error::Error>> {
-        if self.id != id {
-            panic!("parsing seq that is not the one indicated by id.");
-        }
-        self.exp_fold.push_str(exp_fold);
-        Ok(())
+    pub fn get_id(&self) -> String {
+        self.id.to_string()
     }
     
     pub fn sizeof(&self) -> usize {
@@ -82,46 +64,28 @@ impl RnaSequence {
 
 
 pub fn parse_fasta(filepath: &str) -> Vec<RnaSequence> {
-    let content = fs::read_to_string(filepath).context("Failed to read FASTA file");
+    let content = fs::read_to_string(filepath)
+                        .with_context(|| format!("Failed to read FASTA file: {}", filepath));
+    let binding = content.expect("Error lines");
+    let mut lines = binding.lines();
 
-    let mut sequence_list = Vec::new();
-    let mut rnaseq = RnaSequence::new();
+    let mut sequence_list: Vec<RnaSequence> = Vec::new();
+    while let (Some(id_line), Some(fold_line), Some(seq_line)) =
+                   (lines.next(), lines.next(), lines.next()) {
 
-    let mut id = String::new();
-
-    let mut skip_again = false;
-
-    for line in content.expect("Error: no content in parse_fasta()").lines() {
-
-        if skip_again {
-            skip_again = false;
+        if fold_line.contains('[') || fold_line.contains(']') {
             continue;
         }
 
-        if line.starts_with('>') {
-            rnaseq.add_id(line[1..].trim());
-            id.push_str(&rnaseq.get_id());
-
-        } else if line.starts_with('(') | line.starts_with('.') {
-            if line.contains('[') | line.contains(']') {
-                rnaseq = RnaSequence::new();
-                skip_again = true;
-                continue;
-            }
-
-            let _  = rnaseq.add_fold(rnaseq.get_id(), line.trim());
-            
-        } else if line.starts_with('A') | line.starts_with('U') | line.starts_with('G') | line.starts_with('C') | line.starts_with('T') {
-            if line.contains('J') | line.contains('4') {
-                rnaseq = RnaSequence::new();
-                continue;
-            }
-
-            let _ = rnaseq.add_seq(rnaseq.get_id(), line.trim());
-            sequence_list.push(rnaseq);
-            id.clear();
-            rnaseq = RnaSequence::new();
+        if seq_line.contains('J') || seq_line.contains('4') {
+            continue;
         }
+
+        let id       = id_line.trim_start_matches('>').trim();
+        let exp_fold = fold_line.trim();
+        let seq      = seq_line.trim();
+        
+        sequence_list.push(RnaSequence::new(id, exp_fold, seq));
     };
     sequence_list
 }

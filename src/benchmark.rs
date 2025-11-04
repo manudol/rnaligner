@@ -1,33 +1,6 @@
 use crate::io::RnaSequence;
 use crate::compare::Score;
 
-pub enum Algo {
-    nussinov,
-    viennaRNA,
-}
-
-pub enum Show {
-    worst,
-    best,
-    min,
-    max,
-}
-
-pub struct ShowMatchAndID {
-    WithID: bool, 
-    WithMatching: bool,
-}
-
-impl ShowMatchAndID {
-    pub fn new(WithID: bool, WithMatching: bool) -> Self {
-        Self { WithID: WithID, WithMatching: WithMatching }
-    }
-    
-    pub fn check(&self) -> (bool, bool) {
-        (self.WithID && self.WithMatching, self.WithID == self.WithMatching)
-    }
-}
-
 pub struct Benchmark {
     vienna_avg: f64,
     min_vienna: f64,
@@ -73,12 +46,11 @@ impl Benchmark {
 
         let mid = len / 2;
         let right = scores_list.split_off(mid);
-        let left = scores_list; // remaining left half
+        let left = scores_list;
 
         let sorted_left = Self::merge_sort(left);
         let sorted_right = Self::merge_sort(right);
 
-        // merge two sorted vectors
         let mut merged: Vec<f64> = Vec::with_capacity(sorted_left.len() + sorted_right.len());
         let mut i = 0;
         let mut j = 0;
@@ -123,7 +95,7 @@ impl Benchmark {
     }
 
 
-    fn get_avg_score(seq_list: Vec<RnaSequence>, algo: &str, max: i32) -> (f64, f64, f64, f64, Vec<f64>, Vec<f64>, [i32; 5]) {
+    fn get_data(seq_list: Vec<RnaSequence>, algo: &str, max: i32) -> (f64, f64, f64, f64, Vec<f64>, Vec<f64>, [i32; 5]) {
         let mut scores_sum: f64 = 0.0;
         let mut count = 0;
 
@@ -171,7 +143,7 @@ impl Benchmark {
              min_n, 
              top_five_n, 
              bottom_five_n, 
-             distribution_n) = Self::get_avg_score(seq_list.clone(), "nussinov", max.clone());
+             distribution_n) = Self::get_data(seq_list.clone(), "nussinov", max.clone());
 
         let (vienna_avg, 
              std_dev_vienna, 
@@ -179,7 +151,7 @@ impl Benchmark {
              min_v, 
              top_five_v, 
              bottom_five_v, 
-             distribution_v) = Self::get_avg_score(seq_list.clone(), "vienna", max.clone());
+             distribution_v) = Self::get_data(seq_list.clone(), "vienna", max.clone());
 
         Benchmark { vienna_avg: vienna_avg, 
                     nussinov_avg: nussinov_avg, 
