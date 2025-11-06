@@ -17,7 +17,7 @@ pub struct Score {
     algo: String,
     exp_fold: String,
     fold: String,
-    pub score: f32,
+    score: f32,
 }
 
 
@@ -70,6 +70,14 @@ impl Score {
         } else {
             panic!("wrong algorithm!\nOnly 'nussinov' and 'vienna' accepted\nYou entered: {}", algo);
         }
+    }
+    
+    pub fn getID(&self) -> Result<&str, Box<dyn std::error::Error>> {
+        Ok(&self.id)
+    }
+
+    pub fn getScore(&self) -> Result<f64, Box<dyn std::error::Error>> {
+        Ok(self.score as f64)
     }
 
     pub fn repr(&self) -> Result<(), Box<dyn std::error::Error>> {

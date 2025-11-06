@@ -17,6 +17,7 @@ char* vienna_fold(char* seq)
     ss = vrna_alloc(sizeof(char) * (strlen(seq) + 1));
     fc = vrna_fold_compound(seq, NULL, VRNA_OPTION_DEFAULT);
     mfe = vrna_mfe(fc, ss);
+    (void)mfe;
     vrna_fold_compound_free(fc); 
     return ss;
 }

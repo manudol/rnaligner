@@ -11,9 +11,9 @@ fn main() {
     let bench = Benchmark::new(seq_list, 50); // +50 takes a lot time. < 50 works
     
     bench.repr();
-    // bench.csv();
     println!();
 
+    // analyze one single seq
     let id = "tdbR00000365";
     let seq = "AAAUAUGAAGCGAUUUAUUGCAAUUAGUUUCGACCUAAUCUUAGGUGAAAUUCACCCAUAUUUUCCA";
     let exp_fold = "(((((((..((((....)))).(((((.......)))))....((((.....)))))))))))....";
