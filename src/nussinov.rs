@@ -67,6 +67,9 @@ impl Matrix {
     fn calculate_bifucation(&self, j: usize, k: usize) -> (u8, usize) {
         let mut bifurcation = 0;
         let mut optimal_k: usize = 0 as usize;
+        // if k <= j + 1 {
+        //     return (0, j);
+        // }
         for bifurc in j..k {
             let bifurc_value = self.matrix[j][bifurc].value + self.matrix[bifurc+1][k].value;
             if bifurc_value > bifurcation {
@@ -77,79 +80,128 @@ impl Matrix {
         (bifurcation, optimal_k)
     }
 
-
     pub fn find_values(&mut self) {
-        for i in 1..self.seq_len {
-            for j in 0..self.seq_len {
-                let _counter = 0;
-                for k in 1..self.seq_len {
-                    
-                    if self.matrix[j][k].default_0 {
-                        continue;
-                    }
-                    
-                    if k == i + j {
-                        let is_match = self.matrix[j][k].is_match;
-                        
-                        if is_match {
-                            let k_unpaired  = self.matrix[j][k-1].value;
-                            let j_unpaired  = self.matrix[j+1][k].value;
-                            let paired      = self.matrix[j+1][k-1].value;
-                            let paired_plus = paired + 1;
-                            
-                            let (bifurcation, optimal_k) = self.calculate_bifucation(j, k);
-                            
-                            let max_val = paired_plus.max(j_unpaired).max(k_unpaired).max(bifurcation);
-                            
-                            let node: &mut Node = &mut self.matrix[j][k];
-                            node.value = max_val;
-
-                            if paired_plus == max_val {
-                                node.possible_paths.push([j+1, k-1]);
-                            }
-                            if k_unpaired == max_val {
-                                node.possible_paths.push([j, k-1]);
-                            }
-                            if j_unpaired == max_val {
-                                node.possible_paths.push([j+1, k]);
-                            }
-                            if bifurcation == max_val {
-                                node.optimal_k = Some(optimal_k);
-                            }
-                            
-                        } else {
-                            let k_unpaired = self.matrix[j][k-1].value;
-                            let j_unpaired = self.matrix[j+1][k].value;
-
-                            let (bifurcation, optimal_k) = self.calculate_bifucation(j, k);
-                            
-                            let max_val = j_unpaired.max(k_unpaired).max(bifurcation);
-
-                            let node: &mut Node = &mut self.matrix[j][k];
-                            node.value = max_val;
-
-                            if k_unpaired == max_val {
-                                node.possible_paths.push([j, k-1]);
-                            }
-                            if j_unpaired == max_val {
-                                node.possible_paths.push([j+1, k]);
-                            }
-                            if bifurcation == max_val {
-                                node.optimal_k = Some(optimal_k);
-                            }
-                        }
-
-                    } else if k > i + j {
-                        break;
-                    }
+        // Fill diagonally: for each subsequence length
+        const MIN_LS: usize = 3;
+        for length in (MIN_LS + 1)..self.seq_len {
+            for i in 0..(self.seq_len - length) {
+                let j = i + length;
+                
+                if j <= i {
+                    continue;
                 }
-
-                if j == (self.seq_len - 1) - i {
-                    break;
+                
+                let is_match = self.matrix[i][j].is_match;
+                
+                // Case 1: i unpaired
+                let i_unpaired = if i + 1 <= j { self.matrix[i + 1][j].value } else { 0 };
+                
+                // Case 2: j unpaired
+                let j_unpaired = if j > 0 && i <= j - 1 { self.matrix[i][j - 1].value } else { 0 };
+                
+                // Case 3: i-j paired (if they can pair)
+                let paired = if is_match && i + 1 < j {
+                    self.matrix[i + 1][j - 1].value + 1
+                } else {
+                    0
+                };
+                
+                // Case 4: Bifurcation
+                let (bifurcation, optimal_k) = self.calculate_bifucation(i, j);
+                
+                let max_val = i_unpaired.max(j_unpaired).max(paired).max(bifurcation);
+                
+                let node = &mut self.matrix[i][j];
+                node.value = max_val;
+                
+                // Track which path led to max
+                if paired == max_val && paired > 0 {
+                    node.possible_paths.push([i + 1, j - 1]);
+                }
+                if j_unpaired == max_val {
+                    node.possible_paths.push([i, j - 1]);
+                }
+                if i_unpaired == max_val {
+                    node.possible_paths.push([i + 1, j]);
+                }
+                if bifurcation == max_val {
+                    node.optimal_k = Some(optimal_k);
                 }
             }
         }
     }
+//     pub fn find_values(&mut self) {
+//         for i in 1..self.seq_len {
+//             for j in 0..self.seq_len {
+//                 let _counter = 0;
+//                 for k in 1..self.seq_len {
+//                     
+//                     if self.matrix[j][k].default_0 {
+//                         continue;
+//                     }
+//                     
+//                     if k == i + j {
+//                         let is_match = self.matrix[j][k].is_match;
+//                         
+//                         if is_match {
+//                             let k_unpaired  = self.matrix[j][k-1].value;
+//                             let j_unpaired  = self.matrix[j+1][k].value;
+//                             let paired      = self.matrix[j+1][k-1].value;
+//                             let paired_plus = paired + 1;
+//                             
+//                             let (bifurcation, optimal_k) = self.calculate_bifucation(j, k);
+//                             
+//                             let max_val = paired_plus.max(j_unpaired).max(k_unpaired).max(bifurcation);
+//                             
+//                             let node: &mut Node = &mut self.matrix[j][k];
+//                             node.value = max_val;
+// 
+//                             if paired_plus == max_val {
+//                                 node.possible_paths.push([j+1, k-1]);
+//                             }
+//                             if k_unpaired == max_val {
+//                                 node.possible_paths.push([j, k-1]);
+//                             }
+//                             if j_unpaired == max_val {
+//                                 node.possible_paths.push([j+1, k]);
+//                             }
+//                             if bifurcation == max_val {
+//                                 node.optimal_k = Some(optimal_k);
+//                             }
+//                             
+//                         } else {
+//                             let k_unpaired = self.matrix[j][k-1].value;
+//                             let j_unpaired = self.matrix[j+1][k].value;
+// 
+//                             let (bifurcation, optimal_k) = self.calculate_bifucation(j, k);
+//                             
+//                             let max_val = j_unpaired.max(k_unpaired).max(bifurcation);
+// 
+//                             let node: &mut Node = &mut self.matrix[j][k];
+//                             node.value = max_val;
+// 
+//                             if k_unpaired == max_val {
+//                                 node.possible_paths.push([j, k-1]);
+//                             }
+//                             if j_unpaired == max_val {
+//                                 node.possible_paths.push([j+1, k]);
+//                             }
+//                             if bifurcation == max_val {
+//                                 node.optimal_k = Some(optimal_k);
+//                             }
+//                         }
+// 
+//                     } else if k > i + j {
+//                         break;
+//                     }
+//                 }
+// 
+//                 if j == (self.seq_len - 1) - i {
+//                     break;
+//                 }
+//             }
+//         }
+//     }
 
     pub fn new(seq_str: String) -> Matrix {
         let mut matrix = Matrix::init_matrix(seq_str);

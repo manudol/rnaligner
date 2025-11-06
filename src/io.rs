@@ -63,15 +63,16 @@ impl RnaSequence {
 
 
 
-pub fn parse_fasta(filepath: &str) -> Vec<RnaSequence> {
+pub fn parse_fasta(filepath: &str, max: usize) -> Vec<RnaSequence> {
     let content = fs::read_to_string(filepath)
                         .with_context(|| format!("Failed to read FASTA file: {}", filepath));
     let binding = content.expect("Error lines");
     let mut lines = binding.lines();
 
     let mut sequence_list: Vec<RnaSequence> = Vec::new();
+    let mut count = 0 as usize;
     while let (Some(id_line), Some(fold_line), Some(seq_line)) =
-                   (lines.next(), lines.next(), lines.next()) {
+                   (lines.next(), lines.next(), lines.next()) && count < max {
 
         if fold_line.contains('[') || fold_line.contains(']') {
             continue;
@@ -86,6 +87,7 @@ pub fn parse_fasta(filepath: &str) -> Vec<RnaSequence> {
         let seq      = seq_line.trim();
         
         sequence_list.push(RnaSequence::new(id, exp_fold, seq));
+        count += 1;
     };
     sequence_list
 }

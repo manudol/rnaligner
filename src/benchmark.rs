@@ -1,6 +1,6 @@
 use crate::io::RnaSequence;
 use crate::compare::Score;
-
+use rayon::prelude::*;
 
 pub struct Benchmark {
     vienna_avg: f64,
@@ -99,48 +99,42 @@ impl Benchmark {
         arr
     }
 
+    fn get_score(li: RnaSequence, algo: &str) -> (String, f64) {
+        let score = Score::new(li, algo).expect("failed to build Score");
+        let score_num: f64 = score.get_score().expect("REASON");
+        let score_id: String = score.get_id().expect("REASON").to_string();
+        (score_id, score_num)
+    }
+
 
     fn get_data(seq_list: Vec<RnaSequence>, algo: &str, max: i32) -> (f64, f64, (String, f64), (String, f64), Vec<(String, f64)>, Vec<(String, f64)>, [i32; 5]) {
-        let mut score_list: Vec<(String, f64)> = Vec::new();
-        let mut scores_sum: f64 = 0.0;
-        let mut count: i32 = 0;
+        let results: Vec<(String, f64)> = seq_list.par_iter()
+            .map(|seq| Self::get_score(seq.clone(), algo) )
+            .collect();
 
-        for li in seq_list {
-            let score = Score::new(li, algo).expect("failed to build Score");
-            let score_num: f64 = score.get_score().expect("REASON");
-            let score_id: String = score.get_id().expect("REASON").to_string();
-            score_list.push((score_id, score_num));
-        
-            scores_sum += score_num;
-            count +=1;
-            if count >= max { break; }
-        }
-    
-        let avg = if count > 0 { scores_sum / (count as f64) } else { 0.0 };
-    
-        let std = Self::std_dev(avg, &score_list);
+        let scores_sum: f64 = results.par_iter()
+            .map(|(_, score)| score)
+            .sum();
 
-        let sorted_scores = Self::merge_sort(score_list.clone());
+        let avg = scores_sum / (max as f64);
+    
+        let std = Self::std_dev(avg, &results);
+
+        let sorted_scores = Self::merge_sort(results.clone());
 
         let top_five: Vec<(String, f64)> = sorted_scores.iter().rev().take(5).cloned().collect();
         let max_score: (String, f64) = if !top_five.is_empty() { top_five[0].clone() } else { (String::new(), 0.0) };
         let bottom_five: Vec<(String, f64)> = sorted_scores.iter().take(5).cloned().collect();
         let min_score: (String, f64) = if !bottom_five.is_empty() { bottom_five[0].clone() } else { (String::new(), 0.0) };
 
-        let distribution = Self::get_distribution(&score_list);
+        let distribution = Self::get_distribution(&results);
 
         (avg, std, max_score, min_score, top_five, bottom_five, distribution)
     }
 
-    pub fn new(seq_list: Vec<RnaSequence>, max: i32) -> Self {
+    pub fn new(seq_list: Vec<RnaSequence>) -> Self {
 
-        let ( nussinov_avg, 
-              std_dev_nussinov, 
-              max_n, 
-              min_n, 
-              top_five_n, 
-              bottom_five_n, 
-              distribution_n ) = Self::get_data(seq_list.clone(), "nussinov", max.clone());
+        let max = seq_list.len() as i32;
 
         let ( vienna_avg, 
               std_dev_vienna, 
@@ -149,6 +143,14 @@ impl Benchmark {
               top_five_v, 
               bottom_five_v, 
               distribution_v ) = Self::get_data(seq_list.clone(), "vienna", max.clone());
+
+        let ( nussinov_avg, 
+              std_dev_nussinov, 
+              max_n, 
+              min_n, 
+              top_five_n, 
+              bottom_five_n, 
+              distribution_n ) = Self::get_data(seq_list.clone(), "nussinov", max.clone());
 
         Benchmark { vienna_avg: vienna_avg, 
                     nussinov_avg: nussinov_avg, 

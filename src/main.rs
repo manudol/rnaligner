@@ -1,15 +1,21 @@
 use rnaligner::io::{RnaSequence, parse_fasta};
 use rnaligner::compare::Score;
 use rnaligner::benchmark::Benchmark;
-
+use std::mem;
 
 fn main() {
-    let seq_list: Vec<RnaSequence> = parse_fasta("data/trna_unmodified_dot_bracket.txt");
+    let seq_list: Vec<RnaSequence> = parse_fasta("data/trna_unmodified_dot_bracket.txt", 395); // 395 max for nussinov on my machine
+
+    // let vec_size = mem::size_of::<Vec<RnaSequence>>(); 
+    // let size = mem::size_of::<RnaSequence>();
+    // let len = seq_list.len();
+    // println!("len: {}", len);
+    // println!("n bytes: {}", size);
+    // println!("~ total size: {}", len * size + vec_size);
 
     println!();
 
-    let bench = Benchmark::new(seq_list, 50); // +50 takes a lot time. < 50 works
-    
+    let bench = Benchmark::new(seq_list);
     bench.repr();
     println!();
 

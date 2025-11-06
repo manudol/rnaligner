@@ -24,9 +24,9 @@ pub struct Score {
 
 impl Score {
     fn get_accuracy(exp_fold: &str, fold: &str) -> f32 {
-        assert_eq!(exp_fold.len(), fold.len());
+        // assert_eq!(exp_fold.len(), fold.len());
         let mut matches = 0;
-        for i in 0..exp_fold.len() {
+        for i in 0..fold.len().min(exp_fold.len()) {
             if exp_fold.as_bytes()[i] == fold.as_bytes()[i] { matches += 1;
             }
         }
@@ -38,8 +38,11 @@ impl Score {
         let matrix = Matrix::new(seq.to_string());
         //matrix.print_mat();
         let _pairs = matrix.traceback();
+        //println!("here2");
         let fold = matrix.predict_fold();
+        //println!("here3");
         let accuracy = Self::get_accuracy(&seq.exp_fold, &fold);
+        //println!("here4");
 
         Ok(Score { id: seq.get_id(), seq: seq.to_string(), algo: algo, exp_fold: seq.exp_fold.clone(), fold: fold, score: accuracy })
     }
