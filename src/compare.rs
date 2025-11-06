@@ -72,11 +72,15 @@ impl Score {
         }
     }
     
-    pub fn getID(&self) -> Result<&str, Box<dyn std::error::Error>> {
+    pub fn get_id(&self) -> Result<&str, Box<dyn std::error::Error>> {
         Ok(&self.id)
     }
 
-    pub fn getScore(&self) -> Result<f64, Box<dyn std::error::Error>> {
+    pub fn get_seq(&self) -> Result<&str, Box<dyn std::error::Error>> {
+        Ok(&self.seq)
+    }
+
+    pub fn get_score(&self) -> Result<f64, Box<dyn std::error::Error>> {
         Ok(self.score as f64)
     }
 

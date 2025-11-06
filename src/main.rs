@@ -1,6 +1,6 @@
-use RNAligner::io::{RnaSequence, parse_fasta};
-use RNAligner::compare::Score;
-use RNAligner::benchmark::Benchmark;
+use rnaligner::io::{RnaSequence, parse_fasta};
+use rnaligner::compare::Score;
+use rnaligner::benchmark::Benchmark;
 
 
 fn main() {

@@ -46,7 +46,6 @@ impl Matrix {
         let seq_byte_len = seq_bytes.len();
 
         let seq_len = seq_str.len();
-        let mut match_count = 0;
 
         for i in 0..seq_byte_len { 
             for j in 0..seq_byte_len {
@@ -56,9 +55,6 @@ impl Matrix {
                 } else {
                     node.index = [i , j];
                     node.is_match = Self::can_pair(seq_bytes[i], seq_bytes[j]);
-                    if node.is_match {
-                        match_count += 1;
-                    }
                 }
                 row.push(node);
             }

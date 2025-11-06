@@ -107,8 +107,8 @@ impl Benchmark {
 
         for li in seq_list {
             let score = Score::new(li, algo).expect("failed to build Score");
-            let score_num: f64 = score.getScore().expect("REASON");
-            let score_id: String = score.getID().expect("REASON").to_string();
+            let score_num: f64 = score.get_score().expect("REASON");
+            let score_id: String = score.get_id().expect("REASON").to_string();
             score_list.push((score_id, score_num));
         
             scores_sum += score_num;
