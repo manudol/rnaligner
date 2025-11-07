@@ -1,7 +1,7 @@
 use rnaligner::io::{RnaSequence, parse_fasta};
 use rnaligner::compare::Score;
 use rnaligner::benchmark::Benchmark;
-use std::mem;
+// use std::mem;
 
 fn main() {
     let seq_list: Vec<RnaSequence> = parse_fasta("data/trna_unmodified_dot_bracket.txt", 395); // 395 max for nussinov on my machine

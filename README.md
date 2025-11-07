@@ -12,7 +12,7 @@ and legacy RNA alignement prediction algorithms.
 
 ### 1. Import the necessary structs and functions.
 
-The two structs below, allow us to build an RnaSequence structure and that can be passed in the Score struct on which we can to call various folding algorithms.
+The two structs below allow us to build an RnaSequence structure. This struct can be passed in the Score structv to specify vairous folding algorithms and predict various rna structres.
 
 ```rust
 use rnaligner::io::RnaSequence;
