@@ -12,7 +12,7 @@ and legacy RNA alignement prediction algorithms.
 
 ### 1. Import the necessary structs and functions.
 
-The two structs below allow us to build an RnaSequence structure. This struct can be passed in the Score structv to specify vairous folding algorithms and predict various rna structres.
+The two structs below allow us to build an RnaSequence structure. This struct can be passed in the Score struct to specify vairous folding algorithms and predict various rna structres.
 
 ```rust
 use rnaligner::io::RnaSequence;
@@ -21,7 +21,7 @@ use rnaligner::compare::Score;
 
 ### 2. We need to detail the data that will be used.
  - id: the unique identifier of the sequence. 
-    - Note that the id is not really useful in this demonstration, since we only have one sequence deal with. The id wil become more useful when dealing with multiple RNA sequences.
+    - Note that the id is not really useful in this demonstration, since we only have one sequence to deal with. The id will become more useful when dealing with multiple RNA sequences.
 
  - seq: the RNA sequence used to predict the folded 2d structure
 
