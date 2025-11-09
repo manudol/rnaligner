@@ -34,7 +34,7 @@ let seq = "AAAUAUGAAGCGAUUUAUUGCAAUUAGUUUCGACCUAAUCUUAGGUGAAAUUCACCCAUAUUUUCCA";
 let exp_fold = "(((((((..((((....)))).(((((.......)))))....((((.....)))))))))))....";
 ```
 
-### 3. Create a RnaSequence struct
+### 3. Create an RnaSequence struct
 
 ```rust
 let rna_seq = RnaSequence::new(id, exp_fold, seq); 
