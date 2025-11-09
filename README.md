@@ -19,7 +19,7 @@ use rnaligner::io::RnaSequence;
 use rnaligner::compare::Score;
 ```
 
-### 2. We need to detail the data that will be used.
+### 2. Specify the data that will be used.
  - id: the unique identifier of the sequence. 
     - Note that the id is not really useful in this demonstration, since we only have one sequence to deal with. The id will become more useful when dealing with multiple RNA sequences.
 
@@ -34,7 +34,7 @@ let seq = "AAAUAUGAAGCGAUUUAUUGCAAUUAGUUUCGACCUAAUCUUAGGUGAAAUUCACCCAUAUUUUCCA";
 let exp_fold = "(((((((..((((....)))).(((((.......)))))....((((.....)))))))))))....";
 ```
 
-### 3. With the data you specified above you can create a RnaSequence struct
+### 3. Create a RnaSequence struct
 
 ```rust
 let rna_seq = RnaSequence::new(id, exp_fold, seq); 
@@ -42,7 +42,7 @@ let rna_seq = RnaSequence::new(id, exp_fold, seq);
 
 ### 4. Now let's calculate the scores for each algorithm
 
-This is where the fun begins - we're gonna run both algorithms and see how they stack up against each other:
+Here we are running both algorithms to see how they stack up against each other:
 
 ```rust
 // Calculate the score and clone
